@@ -23,6 +23,22 @@ const (
 	Future
 )
 
+type ExprType int
+
+func (t ExprType) IsTimeOnly() bool {
+	return t == ExprTypeTime
+}
+
+func (t ExprType) IsDateOnly() bool {
+	return t == ExprTypeDate
+}
+
+const (
+	ExprTypeInvalid = ExprType(2 << iota)
+	ExprTypeDate
+	ExprTypeTime
+)
+
 // Option function.
 type Option func(*parser)
 
@@ -43,7 +59,7 @@ func WithDirection(d Direction) Option {
 }
 
 // Parse query string.
-func Parse(s string, ref time.Time, options ...Option) (time.Time, error) {
+func Parse(s string, ref time.Time, options ...Option) (time.Time, ExprType, error) {
 	p := &parser{
 		Buffer:    strings.ToLower(s),
 		direction: -1,
@@ -57,17 +73,28 @@ func Parse(s string, ref time.Time, options ...Option) (time.Time, error) {
 	p.Init()
 
 	if err := p.Parse(); err != nil {
-		return time.Time{}, err
+		return time.Time{}, ExprTypeInvalid, err
 	}
 
 	p.Execute()
+
 	// p.PrintSyntaxTree()
-	return p.t, nil
+	return p.t, p.exprType, nil
 }
 
 // withDirection returns duration with direction.
 func (p *parser) withDirection(d time.Duration) time.Duration {
 	return d * time.Duration(p.direction)
+}
+
+func (p *parser) dateExprSet(t time.Time) {
+	p.exprType |= ExprTypeDate
+	p.t = t
+}
+
+func (p *parser) timeExprSet(t time.Time) {
+	p.exprType |= ExprTypeTime
+	p.t = t
 }
 
 // prevWeekday returns the previous week day relative to time t.
