@@ -15,167 +15,136 @@ Query
   <- _ Expr+ EOF
 
 Expr
-  <- Now
-  / RelativeMinutes
-  / RelativeHours
-  / RelativeDays
-  / RelativeWeeks
-  / RelativeWeekdays
-  / RelativeMonth
-  / RelativeYear
-  / Date
-  / Time
+  <- Now { p.exprType |= ExprTypeTime; p.exprType |= ExprTypeDate }
+  / RelativeMinutes { p.exprType |= ExprTypeTime }
+  / RelativeHours { p.exprType |= ExprTypeTime }
+  / RelativeDays { p.exprType |= ExprTypeDate }
+  / RelativeWeeks { p.exprType |= ExprTypeDate }
+  / RelativeWeekdays { p.exprType |= ExprTypeDate }
+  / RelativeMonth { p.exprType |= ExprTypeDate }
+  / RelativeYear { p.exprType |= ExprTypeDate }
+  / Date { p.exprType |= ExprTypeDate }
+  / Time { p.exprType |= ExprTypeTime }
   / Word
 
 Now
   <- NOW
-    {
-      p.exprType |= ExprTypeDate
-      p.exprType |= ExprTypeTime
-    }
 
 RelativeMinutes
   <- Number MINUTES AGO
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(-time.Minute * time.Duration(p.number))
     }
   / (Number MINUTES FROM_NOW / In Number? MINUTES FROM_NOW?)
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(time.Minute * time.Duration(p.number))
     }
   / Last Number? MINUTES
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(-time.Minute * time.Duration(p.number))
     }
   / Next Number? MINUTES
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(time.Minute * time.Duration(p.number))
     }
   / Number MINUTES
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(p.withDirection(time.Minute) * time.Duration(p.number))
     }
 
 RelativeHours
   <- Number HOURS AGO
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(-time.Hour * time.Duration(p.number))
     }
   / (Number HOURS FROM_NOW / In Number? HOURS FROM_NOW?)
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(time.Hour * time.Duration(p.number))
     }
   / Last Number? HOURS
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(-time.Hour * time.Duration(p.number))
     }
   / Next Number? HOURS
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(time.Hour * time.Duration(p.number))
     }
   / Number HOURS
     {
-      p.exprType |= ExprTypeTime
       p.t = p.t.Add(p.withDirection(time.Hour) * time.Duration(p.number))
     }
 
 RelativeDays
   <- Number DAYS AGO
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(-day * time.Duration(p.number)))
     }
   / (Number DAYS FROM_NOW / In Number? DAYS FROM_NOW?)
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.Add(day * time.Duration(p.number))
     }
   / Last Number? DAYS
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(-day * time.Duration(p.number)))
     }
   / Next Number? DAYS
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(day * time.Duration(p.number)))
     }
   / Number DAYS
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(p.withDirection(day) * time.Duration(p.number)))
     }
 
 RelativeWeeks
   <- Number WEEKS AGO
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(-week * time.Duration(p.number))) 
     }
   / (Number WEEKS FROM_NOW / In Number? WEEKS FROM_NOW?)
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.Add(week * time.Duration(p.number))
     }
   / Last Number? WEEKS
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(-week * time.Duration(p.number))) 
     }
   / Next Number? WEEKS
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(week * time.Duration(p.number))) 
     }
   / Number WEEKS
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(p.withDirection(week) * time.Duration(p.number))) 
     }
 
 RelativeMonth
   <- Number MONTHS AGO
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(0, -p.number, 0)
     }
   / (Number MONTHS FROM_NOW / In Number? MONTHS FROM_NOW?)
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(0, p.number, 0)
     }
   / Last Number? MONTHS
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(0, -p.number, 0)
     }
   / Next Number? MONTHS
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(0, p.number, 0)
     }
   / LAST Month
     {
-      p.exprType |= ExprTypeDate
       p.t = prevMonth(p.t, p.month)
     }
   / NEXT Month
     {
-      p.exprType |= ExprTypeDate
       p.t = nextMonth(p.t, p.month)
     }
   / Month
     {
-      p.exprType |= ExprTypeDate
       if p.direction < 0 {
         p.t = prevMonth(p.t, p.month)
       } else {
@@ -186,32 +155,26 @@ RelativeMonth
 RelativeYear
   <- Number YEARS AGO
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(-p.number, 0, 0)
     }
   / (Number YEARS FROM_NOW / In Number? YEARS FROM_NOW?)
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(p.number, 0, 0)
     }
   / Last Number? YEARS
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(-p.number, 0, 0)
     }
   / Next Number? YEARS
     {
-      p.exprType |= ExprTypeDate
       p.t = p.t.AddDate(p.number, 0, 0)
     }
   / LAST YEARS
     {
-      p.exprType |= ExprTypeDate
       p.t = time.Date(p.t.Year() - 1, 1, 1, 0, 0, 0, 0, p.t.Location())
     }
   / NEXT YEARS
     {
-      p.exprType |= ExprTypeDate
       p.t = time.Date(p.t.Year() + 1, 1, 1, 0, 0, 0, 0, p.t.Location())
     }
 
@@ -219,32 +182,26 @@ RelativeYear
 RelativeWeekdays
   <- TODAY
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t)
     }
   / YESTERDAY 
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(-day))
     }
   / TOMORROW
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(p.t.Add(+day))
     }
   / LAST Weekday
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(prevWeekday(p.t, p.weekday))
     }
   / NEXT Weekday
     {
-      p.exprType |= ExprTypeDate
       p.t = truncateDay(nextWeekday(p.t, p.weekday))
     }
   / Weekday
     {
-      p.exprType |= ExprTypeDate
       if p.direction < 0 {
         p.t = truncateDay(prevWeekday(p.t, p.weekday))
       } else {
@@ -255,7 +212,6 @@ RelativeWeekdays
 Date
   <- (Number Ordinal / Last Number? Number)
     {
-      p.exprType |= ExprTypeDate
       t := p.t
       year, month, _ := t.Date()
       hour, min, sec := t.Clock()
@@ -269,7 +225,6 @@ Time
 Clock12Hour
   <- Number
     {
-      p.exprType |= ExprTypeTime
       year, month, day := p.t.Date()
       p.t = time.Date(year, month, day, p.number, 0, 0, 0, p.t.Location())
     }
@@ -277,7 +232,6 @@ Clock12Hour
     AM
   / Number
     {
-      p.exprType |= ExprTypeTime
       year, month, day := p.t.Date()
       p.t = time.Date(year, month, day, p.number + 12, 0, 0, 0, p.t.Location())
     }
@@ -287,7 +241,6 @@ Clock12Hour
 Clock24Hour
   <- Number
     {
-      p.exprType |= ExprTypeTime
       year, month, day := p.t.Date()
       p.t = time.Date(year, month, day, p.number, 0, 0, 0, p.t.Location())
     }
@@ -296,7 +249,6 @@ Clock24Hour
 Minutes
   <- ':' Number
     {
-      p.exprType |= ExprTypeTime
       t := p.t
       year, month, day := t.Date()
       hour, _, _ := t.Clock()
@@ -306,7 +258,6 @@ Minutes
 Seconds
   <- ':' Number
     {
-      p.exprType |= ExprTypeTime
       t := p.t
       year, month, day := t.Date()
       hour, min, _ := t.Clock()
