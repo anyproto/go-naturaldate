@@ -15,14 +15,14 @@ Query
   <- _ Expr+ EOF
 
 Expr
-  <- Now { p.exprType |= ExprTypeTime; p.exprType |= ExprTypeDate }
-  / RelativeMinutes { p.exprType |= ExprTypeTime }
-  / RelativeHours { p.exprType |= ExprTypeTime }
-  / RelativeDays { p.exprType |= ExprTypeDate }
-  / RelativeWeeks { p.exprType |= ExprTypeDate }
-  / RelativeWeekdays { p.exprType |= ExprTypeDate }
-  / RelativeMonth { p.exprType |= ExprTypeDate }
-  / RelativeYear { p.exprType |= ExprTypeDate }
+  <- Now { p.exprType |= ExprTypeNow; p.exprType |= ExprTypeTime; p.exprType |= ExprTypeDate }
+  / RelativeMinutes { p.exprType |= ExprTypeRelativeMinutes; p.exprType |= ExprTypeTime }
+  / RelativeHours { p.exprType |= ExprTypeRelativeHours; p.exprType |= ExprTypeTime }
+  / RelativeDays { p.exprType |= ExprTypeRelativeDays; p.exprType |= ExprTypeDate }
+  / RelativeWeeks { p.exprType |= ExprTypeRelativeWeeks; p.exprType |= ExprTypeDate }
+  / RelativeWeekdays { p.exprType |= ExprTypeRelativeWeekdays; p.exprType |= ExprTypeDate }
+  / RelativeMonth { p.exprType |= ExprTypeRelativeMonth; p.exprType |= ExprTypeDate }
+  / RelativeYear { p.exprType |= ExprTypeRelativeYear; p.exprType |= ExprTypeDate }
   / Date { p.exprType |= ExprTypeDate }
   / Time { p.exprType |= ExprTypeTime }
   / Word
@@ -219,8 +219,8 @@ Date
     }
 
 Time
-  <- Clock12Hour
-   / Clock24Hour 
+  <- Clock12Hour { p.exprType |= ExprTypeClock12Hour }
+   / Clock24Hour { p.exprType |= ExprTypeClock24Hour }
 
 Clock12Hour
   <- Number

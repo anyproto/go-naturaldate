@@ -232,6 +232,10 @@ var futureCases = []struct {
 	{`Check logs in the past 5 minutes`, `2019-11-25 13:02:18 +0000 UTC`, ExprTypeTime},
 }
 
+func assertHasFields(t *testing.T, want, got ExprType) {
+	assert.True(t, (want&got) == want)
+}
+
 // Test parsing with past direction.
 func TestParse_past(t *testing.T) {
 	for _, c := range pastCases {
@@ -241,7 +245,7 @@ func TestParse_past(t *testing.T) {
 				assert.Equal(t, c.Output, err.Error())
 				return
 			}
-			assert.Equal(t, c.ExprType, exprType)
+			assertHasFields(t, c.ExprType, exprType)
 			assert.Equal(t, c.Output, v.UTC().String())
 		})
 	}
@@ -256,7 +260,7 @@ func TestParse_future(t *testing.T) {
 				assert.Equal(t, c.Output, err.Error())
 				return
 			}
-			assert.Equal(t, c.ExprType, exprType)
+			assertHasFields(t, c.ExprType, exprType)
 			assert.Equal(t, c.Output, v.UTC().String())
 		})
 	}

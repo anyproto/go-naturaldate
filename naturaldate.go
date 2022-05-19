@@ -37,6 +37,16 @@ const (
 	ExprTypeInvalid = ExprType(2 << iota)
 	ExprTypeDate
 	ExprTypeTime
+	ExprTypeNow
+	ExprTypeRelativeMinutes
+	ExprTypeRelativeHours
+	ExprTypeRelativeDays
+	ExprTypeRelativeWeeks
+	ExprTypeRelativeWeekdays
+	ExprTypeRelativeMonth
+	ExprTypeRelativeYear
+	ExprTypeClock12Hour
+	ExprTypeClock24Hour
 )
 
 // Option function.
