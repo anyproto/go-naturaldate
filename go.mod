@@ -1,4 +1,4 @@
-module github.com/deff7/go-naturaldate/v2
+module github.com/anytypeio/go-naturaldate/v2
 
 go 1.13
 
