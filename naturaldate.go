@@ -34,8 +34,8 @@ func (t ExprType) IsDateOnly() bool {
 }
 
 const (
-	ExprTypeInvalid = ExprType(2 << iota)
-	ExprTypeDate
+	ExprTypeInvalid = 0
+	ExprTypeDate    = ExprType(1 << iota)
 	ExprTypeTime
 	ExprTypeNow
 	ExprTypeRelativeMinutes
